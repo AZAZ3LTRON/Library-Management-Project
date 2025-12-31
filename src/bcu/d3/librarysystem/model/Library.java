@@ -26,8 +26,10 @@ public class Library {
     }
 
     public Patron getPatronByID(int id) throws LibraryException {
-        // TODO: implementation here
-        return null;
+        if (!patrons.containsKey(id)){
+            throw new LibraryException("No such person possess the id");
+        }
+        return patrons.get(id);
     }
 
     public void addBook(Book book) {
@@ -38,7 +40,16 @@ public class Library {
     }
 
     public void addPatron(Patron patron) {
-        // TODO: implementation here
+        if (!patrons.containsKey(patron.getId())){
+            throw new IllegalArgumentException("A person already possess this id.");
+        }
+        patrons.put(patron.getId(), patron);
+    }
+
+    // Extras: Additional Functions
+    public List<Patron> getAllPatrons(){
+        List<Patron> out = new ArrayList<>(patrons.values());
+        return Collections.unmodifiableList(out);
     }
 }
  

@@ -6,8 +6,7 @@ import bcu.d3.librarysystem.model.Library;
 import bcu.d3.librarysystem.model.Patron;
 import java.time.LocalDate;
 
-// Show a patron’s details in the system – 
-// should also display the borrowed books if implemented the borrow feature.
+// Command prints out a particular patron on the system
 public class ShowPatron implements Command {
     
     private final int patronId; // The patron's Id
@@ -33,7 +32,7 @@ public class ShowPatron implements Command {
         } else {
             System.out.println("Borrowed books:- ");
             for (Book book : patron.getBooks()){
-                System.out.println(" - " book.getDetailsShort());
+                System.out.println(" - " + book.getDetailsShort());
             }
         }
     }
