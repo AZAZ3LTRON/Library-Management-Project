@@ -9,16 +9,18 @@ public class Book {
     private String title;
     private String author;
     private String publicationYear;
-    private final String publisher;
-
+    private String publisher;
+    private boolean deleted;
     private Loan loan;
 
+    // Constrcutor
     public Book(int id, String title, String author, String publicationYear, String publisher) {
         this.id = id;
         this.title = title;
         this.author = author;
         this.publicationYear = publicationYear;
         this.publisher = publisher;
+        this.deleted = false;
     }
 
     /* Getters */
@@ -53,14 +55,19 @@ public class Book {
             + "Status:- " + getStatus();
     }
     
+    // Updated for 7.1
     public String getStatus() {
-        if (isOnLoan()){
-            if (loan != null && loan.isOverdue(LocalDate.now())){
+        if (deleted) {
+            return "DELETED";
+        } else if (isOnLoan()) {
+            if (loan != null && loan.isOverdue(LocalDate.now())) {
                 return "ON LOAN (OVERDUE)";
+            } else {
+                return "ON LOAN";
             }
+        } else {
             return "AVAILABLE";
         }
-        return null;
     }
 
     public LocalDate getDueDate() {
@@ -81,6 +88,23 @@ public class Book {
         return 0;
     }
 
+    // For 7.1
+    public boolean isDeleted(){
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted){
+        this.deleted = deleted;
+    }
+
+    // Check if book can be deleted
+    public boolean canDelete(){
+        if (!deleted && !isOnLoan()){
+            return true; 
+        }
+        return false;
+    }
+
     /* Setters */
     public void setId(int id) {
         this.id = id;
@@ -98,6 +122,10 @@ public class Book {
         this.publicationYear = publicationYear;
     }
   
+    public void setPublisher(String publisher){
+        this.publisher = publisher;
+    }
+
     public void setDueDate(LocalDate dueDate) throws LibraryException {
         if (loan == null){
             throw new LibraryException("Book is not on loan");
@@ -110,8 +138,10 @@ public class Book {
     }
 
     /* Extras */
+
+    // Updated for 7.1
     public boolean isOnLoan() {
-        return (loan != null);
+        return (loan != null && deleted == false);
     }
 
     public void returnToLibrary() {
@@ -135,7 +165,12 @@ public class Book {
         return null;
     }
 
+
+    // Updated for 7.1 
     public void borrow(Patron patron, LocalDate dueDate) throws LibraryException{
+        if (deleted){
+            throw new LibraryException("Book doesn't exist");
+        }
         if (isOnLoan()){
             throw new LibraryException("Book is already loaned out.");
         }
@@ -143,6 +178,9 @@ public class Book {
     }
 
     public void renew(LocalDate newDueDate) throws LibraryException {
+        if (deleted){
+            throw new LibraryException("Book doesn't exist");
+        }
         if (!isOnLoan()) {
             throw new LibraryException("Cannot renew a book that is not on loan.");
         }

@@ -171,5 +171,10 @@ public class MainWindow extends JFrame implements ActionListener {
         this.getContentPane().removeAll();
         this.getContentPane().add(new JScrollPane(table));
         this.revalidate();
-    }	
+    }
+
+	public void displayPatrons() {
+		// TODO Auto-generated method stub
+		
+	}	
 }

@@ -3,19 +3,10 @@ package bcu.d3.librarysystem.gui;
 import bcu.d3.librarysystem.commands.AddBook;
 import bcu.d3.librarysystem.commands.Command;
 import bcu.d3.librarysystem.main.LibraryException;
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.*;
+import java.awt.event.*;
 import java.time.LocalDate;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.UIManager;
+import javax.swing.*;
 
 public class AddBookWindow extends JFrame implements ActionListener {
 
@@ -23,6 +14,7 @@ public class AddBookWindow extends JFrame implements ActionListener {
     private JTextField titleText = new JTextField();
     private JTextField authText = new JTextField();
     private JTextField pubDateText = new JTextField();
+    private JTextField publisherText = new JTextField();
 
     private JButton addBtn = new JButton("Add");
     private JButton cancelBtn = new JButton("Cancel");
@@ -40,7 +32,7 @@ public class AddBookWindow extends JFrame implements ActionListener {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception ex) {
-
+            // Kept default for look & feel
         } 
 
         setTitle("Add a New Book");
@@ -54,6 +46,8 @@ public class AddBookWindow extends JFrame implements ActionListener {
         topPanel.add(authText);
         topPanel.add(new JLabel("Publishing Date : "));
         topPanel.add(pubDateText);
+        topPanel.add(new JLabel("Publisher"));
+        topPanel.add(publisherText);
 
         JPanel bottomPanel = new JPanel();
         bottomPanel.setLayout(new GridLayout(1, 3));
@@ -87,8 +81,10 @@ public class AddBookWindow extends JFrame implements ActionListener {
             String title = titleText.getText();
             String author = authText.getText();
             String publicationYear = pubDateText.getText();
+            String publisher = publisherText.getText();
+
             // create and execute the AddBook Command
-            Command addBook = new AddBook(title, author, publicationYear);
+            Command addBook = new AddBook(title, author, publicationYear, publisher);
             addBook.execute(mw.getLibrary(), LocalDate.now());
             // refresh the view with the list of books
             mw.displayBooks();

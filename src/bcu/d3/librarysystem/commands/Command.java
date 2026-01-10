@@ -14,6 +14,7 @@ public interface Command {
             + "\taddpatron                       add a new patron\n"
             + "\tshowbook                        show book details\n"
             + "\tshowpatron                      show patron details\n"
+            + "\tdeletebook                      delete a book*\n"
             + "\tborrow                          borrow a book\n"
             + "\trenew                           renew a book\n"
             + "\treturn                          return a book\n"

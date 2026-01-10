@@ -11,11 +11,18 @@ public class ListBooks implements Command {
 
     @Override
     public void execute(Library library, LocalDate currentDate) throws LibraryException {
-        List<Book> books = library.getBooks();
-        for (Book book : books) {
+        List<Book> booksList = library.getAllBooks();
+        
+        if (booksList.isEmpty()) {
+            System.out.println("\nNo books found.\n");
+            return;
+        }
+
+        System.out.println("Books in the library");
+        System.out.println("Total books in the library is" + booksList.size() + " book(s)");
+        for (Book book : booksList) {
             System.out.println(book.getDetailsShort());
         }
-        System.out.println(books.size() + " book(s)");
+
     }
 }
- 

@@ -8,13 +8,12 @@ import bcu.d3.librarysystem.commands.Help;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.*;
 
 public class CommandParser {
     
     public static Command parse(String line) throws IOException, LibraryException {
         try {
-            String[] parts = line.split(" ", 3);
+            String[] parts = line.split(" ", 4);
             String cmd = parts[0];
 
             // TODO: Link your implemented features to commands here 
@@ -26,8 +25,10 @@ public class CommandParser {
                 String author = br.readLine();
                 System.out.print("Publication Year: ");
                 String publicationYear = br.readLine();
+                System.out.print("Publisher: ");
+                String publisher = br.readLine();
                 
-                return new AddBook(title, author, publicationYear);
+                return new AddBook(title, author, publicationYear, publisher);
             } else if (cmd.equals("addpatron")) {
                 
             } else if (cmd.equals("loadgui")) {

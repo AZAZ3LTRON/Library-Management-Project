@@ -44,7 +44,13 @@ public class BorrowBook implements Command {
             throw new LibraryException("Patron " + patron.getName() + 
                                     " has reached the maximum borrowing limit of 5 books.");
         }
-
+        
+        // 7.3 Update: Check if patron has reached borrowing limit
+        int maxBooks = library.borrowingLimit();
+        if (patron.getBooks().size() >= maxBooks) {
+        	throw new LibraryException("Patron has reached their max borrowing limit");
+        }
+        
         // Check if patron has overdue books (optional restriction)
         if (patron.hasOverdueBooks(currentDate)) {
             throw new LibraryException("Patron " + patron.getName() + 
@@ -61,5 +67,5 @@ public class BorrowBook implements Command {
         System.out.println("Borrowed on: " + currentDate);
         System.out.println("Due date: " + dueDate);
         System.out.println();
-}
+    }
 }

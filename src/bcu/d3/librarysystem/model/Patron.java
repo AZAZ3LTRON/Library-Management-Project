@@ -9,14 +9,30 @@ public class Patron {
     private final int id;
     private final String name;
     private final String phone;
-    private final List<Book> books;
+    private final String email; // 5.2
+    private List<Book> books;
+    private boolean userdeleted; // For 7.2
+    private final int borrowingLimit;
     
-    // TODO: implement constructor here
-    public Patron(int id, String name, String phone, List<Book> books) {
+    // For New Patrons
+    public Patron(int id, String name, String phone, String email){
+        this.id = id;
+        this.name = name;
+        this.phone = phone;
+        this.books = new ArrayList<>();
+        this.email = email; // 5.2
+        this.borrowingLimit = 2;
+    }
+
+    // For existing patrons
+    public Patron(int id, String name, String phone, String email, List<Book> books) {
     	this.id = id;
     	this.name = name;
     	this.phone = phone;
-    	this.books = new ArrayList<>();
+        this.email = email; // For 5.2
+    	this.books = new ArrayList<>(books);
+    	this.userdeleted = false; // For 7.2
+    	this.borrowingLimit = 2; // For 7.3
     }
     
     // Getters (added by user)
@@ -32,15 +48,52 @@ public class Patron {
     	return phone;
     }
     
+
+    // For 5.2
+    public String getEmail(){
+        return email;
+    }
+
     public List<Book> getBooks(){
     	return new ArrayList<>(books);
     }
 
-    // Extra: Additional Functions
-    public int getBookCount(){
-        return books.size();
+    // For 7.2
+    public boolean isDeleted() {
+    	return userdeleted;
     }
     
+    // For 7.2
+    public void setDeleted(boolean userdeleted) throws LibraryException {
+        if (userdeleted && !books.isEmpty()){
+            throw new LibraryException("Patron hasn't returned books| Can't delete patron ");
+        }
+    	this.userdeleted = userdeleted;
+    }
+
+    // For 7.2
+    public boolean isActive(){
+        return !userdeleted;
+    }
+    
+    // For 7.3
+    public int getBorrowingLimit() {
+    	return borrowingLimit;
+    }
+
+    public int getRemainingBorrowingCapacity() {
+        return borrowingLimit - books.size();
+    }
+    
+    public boolean canBorrowMore() {
+        return books.size() < borrowingLimit;
+    }
+    
+    public boolean hasReachedBorrowingLimit() {
+        return books.size() >= borrowingLimit;
+    }
+    
+    // Extra: Additional Functions
     public boolean hasBook(Book book){
         return books.contains(book);
     }
@@ -70,9 +123,13 @@ public class Patron {
     }
 
     // Existed
-
     public void borrowBook(Book book, LocalDate dueDate) throws LibraryException{
-        if (books.size() >= 5) {
+        // Changed for 7.2
+    	if (userdeleted) {
+    		throw new LibraryException("Patron Deleted: Can't borrow book");
+    	}
+    	
+    	if (books.size() >= 5) {
             throw new LibraryException("Patron " + name + " has reached the maximum borrowing limit of 5 books.");
         }
         
@@ -92,7 +149,12 @@ public class Patron {
     }
 
     public void renewBook(Book book, LocalDate newDueDate) throws LibraryException {
-        // Check if patron has this book
+        // Updated for 7.2 	
+    	if (userdeleted) {
+        	throw new LibraryException("Patron Deleted: Can't borrow book");
+        }
+    	
+    	// Check if patron has this book
         if (!books.contains(book)) {
             throw new LibraryException("Patron " + name + " cannot renew a book they haven't borrowed: " + book.getTitle());
         }
@@ -120,21 +182,5 @@ public class Patron {
         // Return the book
         book.returnBook();
         books.remove(book);
-    }
-    
-    public void addBook(Book book) {
-        // Directly add a book without checks (used when loading data)
-        if (!books.contains(book)) {
-            books.add(book);
-        }
-    }
-    
-    // Extras 2
-    public void removeBook(Book book) {
-        books.remove(book);
-    }
-    
-    public void clearBooks() {
-        books.clear();
     }
 }
