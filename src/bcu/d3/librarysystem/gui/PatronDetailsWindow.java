@@ -56,7 +56,7 @@ public class PatronDetailsWindow extends JDialog implements ActionListener {
             
             // Capture the output that would go to console
             // Since ShowPatron prints to System.out, we need to capture it
-            // For now, we'll format it ourselves to match the command output
+            // Therefore, we'll format it ourselves to match the command output
             
             return formatPatronDetails();
             
@@ -66,7 +66,6 @@ public class PatronDetailsWindow extends JDialog implements ActionListener {
     }
     
     private String formatPatronDetails() {
-        // Format similar to what ShowPatron command would output
         String details = "══════════════════════════════════════════\n";
         details = details + "PATRON DETAILS\n";
         details = details + "══════════════════════════════════════════\n";
@@ -74,7 +73,7 @@ public class PatronDetailsWindow extends JDialog implements ActionListener {
         details = details + "Name: " + patron.getName() + "\n";
         details = details + "Phone: " + patron.getPhone() + "\n";
         details = details + "Email: " + patron.getEmail() + "\n";
-        details = details + "Books Borrowed: " + patron.getBookCount() + "\n";
+        details = details + "Books Borrowed: " + patron.getBooks().size() + "\n";
         details = details + "══════════════════════════════════════════\n";
         return details;
     }

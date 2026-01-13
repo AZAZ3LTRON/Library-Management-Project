@@ -10,6 +10,7 @@ public class Library {
     private final int borrowingLimit = 2; //7.3
     private final Map<Integer, Patron> patrons = new TreeMap<>();
     private final Map<Integer, Book> books = new TreeMap<>();
+    private LoanHistory loanHistory = new LoanHistory(); //8.1
 
     public int getLoanPeriod() {
         return loanPeriod;
@@ -127,9 +128,29 @@ public class Library {
     	}
     	patron.setDeleted(true);
     }
+
     public List<Patron> getAllPatrons(){
         List<Patron> out = new ArrayList<>(patrons.values());
         return Collections.unmodifiableList(out);
     }
+
+    // Loan History: 8.1
+    public List<Loan> getPatronLoanHistory(int patronId) throws LibraryException {
+        if (!patrons.containsKey(patronId)) {
+            throw new LibraryException("Patron with ID " + patronId + " not found.");
+        }
+        return loanHistory.getPatronHistory(patronId);
+    }
+    
+    //8.1 Get all active loans
+    public List<Loan> getActiveLoans() {
+        return loanHistory.getActiveLoans();
+    }
+
+    // 8.1: Get completed loans
+    public List<Loan> getCompletedLoans() {
+        return loanHistory.getCompletedLoans();
+    }
+
 }
  

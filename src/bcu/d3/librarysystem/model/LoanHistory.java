@@ -28,12 +28,6 @@ public class LoanHistory {
             .collect(Collectors.toList());
     }
     
-    public List<Loan> getBookHistory(int bookId) {
-        return allLoans.stream()
-            .filter(loan -> loan.getBook().getId() == bookId)
-            .collect(Collectors.toList());
-    }
-    
     public List<Loan> getActiveLoans() {
         return allLoans.stream()
             .filter(loan -> !loan.isReturned())
