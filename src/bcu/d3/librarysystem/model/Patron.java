@@ -129,7 +129,7 @@ public class Patron {
     		throw new LibraryException("Patron Deleted: Can't borrow book");
     	}
     	
-    	if (books.size() >= 5) {
+    	if (books.size() >= 2) {
             throw new LibraryException("Patron " + name + " has reached the maximum borrowing limit of 5 books.");
         }
         
@@ -183,4 +183,5 @@ public class Patron {
         book.returnBook();
         books.remove(book);
     }
+    
 }

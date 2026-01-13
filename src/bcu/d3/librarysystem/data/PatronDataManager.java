@@ -77,7 +77,7 @@ public class PatronDataManager implements DataManager {
                            patron.getName() + SEPARATOR + 
                            patron.getPhone() + SEPARATOR +
                            patron.getEmail() + SEPARATOR +
-                           patron.isDeleted() + SEPARATOR);
+                           patron.isDeleted());
             }
         }
     }

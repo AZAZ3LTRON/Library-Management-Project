@@ -1,8 +1,8 @@
 package bcu.d3.librarysystem.commands;
 
 import bcu.d3.librarysystem.main.LibraryException;
-import bcu.d3.librarysystem.model.Library;
 import bcu.d3.librarysystem.model.Book;
+import bcu.d3.librarysystem.model.Library;
 import bcu.d3.librarysystem.model.Patron;
 import java.time.LocalDate;
 
@@ -38,12 +38,6 @@ public class BorrowBook implements Command {
         if (book.isOnLoan()) {
             throw new LibraryException("Book \"" + book.getTitle() + "\" is already borrowed.");
         }
-
-        // Check if patron has reached borrowing limit (assuming max 5 books)
-        if (patron.getBooks().size() >= 5) {
-            throw new LibraryException("Patron " + patron.getName() + 
-                                    " has reached the maximum borrowing limit of 5 books.");
-        }
         
         // 7.3 Update: Check if patron has reached borrowing limit
         int maxBooks = library.borrowingLimit();
@@ -59,13 +53,7 @@ public class BorrowBook implements Command {
 
         // Borrow the book
         patron.borrowBook(book, dueDate);
-
-        // Confirmation message
         System.out.println("\n✅ Book borrowed successfully!");
-        System.out.println("Patron: " + patron.getName() + " (ID: " + patronId + ")");
-        System.out.println("Book: " + book.getTitle() + " by " + book.getAuthor());
-        System.out.println("Borrowed on: " + currentDate);
-        System.out.println("Due date: " + dueDate);
         System.out.println();
     }
 }

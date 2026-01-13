@@ -1,8 +1,7 @@
 package bcu.d3.librarysystem.data;
 
-import bcu.d3.librarysystem.model.Library;
 import bcu.d3.librarysystem.main.LibraryException;
-
+import bcu.d3.librarysystem.model.Library;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,11 +13,8 @@ public class LibraryData {
     // runs only once when the object gets loaded to memory
     static {
         dataManagers.add(new BookDataManager());
-        
-        /* Uncomment the two lines below when the implementation of their 
-        loadData() and storeData() methods is complete */
-        // dataManagers.add(new PatronDataManager());
-        // dataManagers.add(new LoanDataManager());
+        dataManagers.add(new PatronDataManager());
+        dataManagers.add(new LoanDataManager());
     }
     
     public static Library load() throws LibraryException, IOException {

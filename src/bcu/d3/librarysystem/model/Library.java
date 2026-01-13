@@ -24,10 +24,7 @@ public class Library {
     // Borrowing Limit Checker (7.3)
     public boolean canPatronBorrowMore(int patronId) throws LibraryException{
     	Patron patron = getPatronByID(patronId);
-    	if (patron.getBooks().size() < borrowingLimit) {
-    		return false;
-    	}
-		return true;
+        return patron.getBooks().size() < borrowingLimit;
     }
     
     //Borrowing limit hecker 2
@@ -112,7 +109,7 @@ public class Library {
     }
 
     public void addPatron(Patron patron) {
-        if (!patrons.containsKey(patron.getId())){
+        if (patrons.containsKey(patron.getId())){
             throw new IllegalArgumentException("A person already possess this id.");
         }
         patrons.put(patron.getId(), patron);

@@ -19,13 +19,20 @@ public class PatronHistory implements Command {
         Patron patron = library.getPatronByID(patronId);
         List<Loan> history = library.getPatronLoanHistory(patronId);
 
+
         System.out.println("Patron ID:- " + patronId);
         System.out.println("Name: " + patron.getName());
         System.out.println("Total Loans: " + history.size());
         
         if (history.isEmpty()) {
-            System.out.println("No loan history found for this patron.");
-            return;
+                System.out.println("No loan history found for this patron.");
+        } else{
+        for (Loan loan : history){
+            System.out.println("Book: " + loan.getBook().getTitle() + 
+                            " | Borrowed: " + loan.getStartDate() + 
+                            " | Due: " + loan.getDueDate() + 
+                            " | Renewals: " + loan.getRenewalCount());
+            }
         }
     }
 }

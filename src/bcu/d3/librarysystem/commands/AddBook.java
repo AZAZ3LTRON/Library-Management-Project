@@ -22,7 +22,7 @@ public class AddBook implements  Command {
     @Override
     public void execute(Library library, LocalDate currentDate) throws LibraryException {
         int maxId = 0;
-    	if (library.getBooks().isEmpty()) {
+    	if (!library.getBooks().isEmpty()) {
     		int lastIndex = library.getBooks().size() - 1;
             maxId = library.getBooks().get(lastIndex).getId();
     	}
