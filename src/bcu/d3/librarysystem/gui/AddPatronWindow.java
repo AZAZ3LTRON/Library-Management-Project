@@ -88,7 +88,7 @@ public class AddPatronWindow extends JFrame implements ActionListener {
             // refresh the view with the list of patrons
             mw.displayPatrons();
             // hide (close) the AddPatronWindow
-            this.setVisible(false);
+            dispose();
         } catch (LibraryException ex) {
             JOptionPane.showMessageDialog(this, ex, "Error", JOptionPane.ERROR_MESSAGE);
         }

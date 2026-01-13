@@ -89,7 +89,7 @@ public class AddBookWindow extends JFrame implements ActionListener {
             // refresh the view with the list of books
             mw.displayBooks();
             // hide (close) the AddBookWindow
-            this.setVisible(false);
+            dispose();
         } catch (LibraryException ex) {
             JOptionPane.showMessageDialog(this, ex, "Error", JOptionPane.ERROR_MESSAGE);
         }
