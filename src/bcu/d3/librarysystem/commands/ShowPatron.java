@@ -19,6 +19,11 @@ public class ShowPatron implements Command {
     public void execute(Library library, LocalDate currentDate) throws LibraryException{
         Patron patron = library.getPatronByID(patronId);
         
+        if (patron.isDeleted()) {
+            System.out.println("\n This patron has been removed from the system.");
+            return;
+        }
+        
         // Print out patron detail (make sure necessary methods are established)
         System.out.println("Patron Details \n");
         System.out.println("Patron ID:- " + patron.getId());

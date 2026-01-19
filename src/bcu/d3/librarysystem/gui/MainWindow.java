@@ -1,5 +1,6 @@
 package bcu.d3.librarysystem.gui;
 
+import bcu.d3.librarysystem.main.LibraryException;
 import bcu.d3.librarysystem.model.Book;
 import bcu.d3.librarysystem.model.Library;
 import bcu.d3.librarysystem.model.Patron;
@@ -8,6 +9,7 @@ import java.awt.event.*;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import java.util.ArrayList;
 
 public class MainWindow extends JFrame implements ActionListener {
 
@@ -28,15 +30,17 @@ public class MainWindow extends JFrame implements ActionListener {
     private JMenuItem booksReturn;
     private JMenuItem booksRenew;
     private JMenuItem booksShow;
+    
+    private JMenuItem helpCommands;
 
     private JMenuItem memView;
     private JMenuItem memAdd;
     private JMenuItem memDel;
     private JMenuItem memShow;
     private JMenuItem memHistory;
+    private JMenuItem adminRefresh;
+    private JMenuItem memBrowse;
 
-    private JMenuItem helpAbout;
-    private JMenuItem helpCommands;
 
     private Library library;
     private JTabbedPane tabbedPane;
@@ -49,6 +53,7 @@ public class MainWindow extends JFrame implements ActionListener {
         this.library = library;
         initialize();
         displayBooks(); // Show books by default
+        displayPatrons();
     } 
     
     public Library getLibrary() {
@@ -66,7 +71,7 @@ public class MainWindow extends JFrame implements ActionListener {
         }
 
         setTitle("Library Management System");
-        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/library-icon.png")));
+        //setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/library-icon.png")));
 
         menuBar = new JMenuBar();
         setJMenuBar(menuBar);
@@ -82,6 +87,17 @@ public class MainWindow extends JFrame implements ActionListener {
         adminBackup = new JMenuItem("Create Backup");
         adminBackup.addActionListener(e -> createBackup());
         
+        // Added refresh option
+        adminRefresh = new JMenuItem("Refresh All");
+        adminRefresh.addActionListener(e -> {
+            displayBooks();
+            displayPatrons();
+            JOptionPane.showMessageDialog(MainWindow.this, 
+                "All displays refreshed.", 
+                "Refresh", 
+                JOptionPane.INFORMATION_MESSAGE);
+        });
+        
         adminExit = new JMenuItem("Exit");
         adminExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK));
         adminExit.addActionListener(this);
@@ -90,6 +106,9 @@ public class MainWindow extends JFrame implements ActionListener {
         adminMenu.add(adminBackup);
         adminMenu.addSeparator();
         adminMenu.add(adminExit);
+        adminMenu.add(adminRefresh);
+        
+
 
         // ========== BOOKS MENU ==========
         booksMenu = new JMenu("Books");
@@ -141,6 +160,10 @@ public class MainWindow extends JFrame implements ActionListener {
         memAdd.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK));
         memAdd.addActionListener(this);
         
+        memBrowse = new JMenuItem("Browse All Patrons");
+        memBrowse.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
+        memBrowse.addActionListener(this);
+        
         memDel = new JMenuItem("Delete Patron");
         memDel.addActionListener(this);
         
@@ -155,6 +178,7 @@ public class MainWindow extends JFrame implements ActionListener {
         membersMenu.add(memDel);
         membersMenu.add(memShow);
         membersMenu.add(memHistory);
+        membersMenu.add(memBrowse);
 
         // ========== HELP MENU ==========
         helpMenu = new JMenu("Help");
@@ -162,12 +186,8 @@ public class MainWindow extends JFrame implements ActionListener {
 
         helpCommands = new JMenuItem("Available Commands");
         helpCommands.addActionListener(e -> showHelpCommands());
-        
-        helpAbout = new JMenuItem("About");
-        helpAbout.addActionListener(e -> showAbout());
 
         helpMenu.add(helpCommands);
-        helpMenu.add(helpAbout);
 
         // ========== MAIN CONTENT ==========
         tabbedPane = new JTabbedPane();
@@ -291,7 +311,12 @@ public class MainWindow extends JFrame implements ActionListener {
                     int row = patronsTable.rowAtPoint(e.getPoint());
                     if (row >= 0) {
                         int patronId = (int) patronsTable.getValueAt(row, 0);
-                        showPatronDetails(patronId);
+                        try {
+                            Patron patron = library.getPatronByID(patronId);
+                            new PatronDetailsWindow(MainWindow.this, patron);
+                        } catch (Exception ex) {
+                            showError("Error", "Could not load patron details: " + ex.getMessage());
+                        }
                     }
                 }
             }
@@ -319,7 +344,12 @@ public class MainWindow extends JFrame implements ActionListener {
             }
         }
     }
-
+    
+    // For GUI updates
+    public JTabbedPane getTabbedPane() {
+        return tabbedPane;
+    }
+    
     @Override
     public void actionPerformed(ActionEvent ae) {
         Object source = ae.getSource();
@@ -336,8 +366,23 @@ public class MainWindow extends JFrame implements ActionListener {
             new AddBookWindow(this);
         } 
         else if (source == booksDel) {
-            new DeleteBookWindow(this);
-        } 
+        // Ask for Book ID first
+        String bookIdStr = JOptionPane.showInputDialog(this,
+            "Enter Book ID to delete:",
+            "Delete Book",
+            JOptionPane.QUESTION_MESSAGE);
+        
+        if (bookIdStr != null && !bookIdStr.trim().isEmpty()) {
+            try {
+                int bookId = Integer.parseInt(bookIdStr.trim());
+                // Open delete window with ID
+                new DeleteBookWindow(this, bookId);
+            } catch (NumberFormatException e) {
+                showError("Invalid Input", "Please enter a valid numeric Book ID.");
+                }
+            }
+        }
+        
         else if (source == booksShow) {
             showBookDetailsDialog();
         }
@@ -370,57 +415,104 @@ public class MainWindow extends JFrame implements ActionListener {
         else if (source == memHistory) {
             showPatronHistoryDialog();
         }
+        else if (source == memBrowse) {
+            new DisplayPatronWindow(this);
+        }
     }
-
+    
+    // Add these methods to MainWindow.java
+    public void refreshDisplay() {
+        // Run on the Event Dispatch Thread (EDT) for thread safety
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                int selectedTab = tabbedPane.getSelectedIndex();
+                if (selectedTab == 0) {
+                    displayBooks();
+                } else {
+                    displayPatrons();
+                }
+                updateStatusCounts();
+            }
+        });
+    }
+    
+    public void refreshAllDisplays() {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                displayBooks();
+                displayPatrons();
+                updateStatusCounts();
+            }
+        });
+    }
+    
+    // Update displayBooks() to be more robust:
     public void displayBooks() {
-        List<Book> booksList = library.getBooks();
-        booksTableModel.setRowCount(0);
-        
-        // Filter out deleted books for display
-        List<Book> activeBooks = booksList.stream()
-            .filter(book -> !book.isDeleted())
-            .toList();
-        
-        for (Book book : activeBooks) {
-            Object[] row = {
-                book.getId(),
-                book.getTitle(),
-                book.getAuthor(),
-                book.getPublicationYear(),
-                book.getPublisher(),
-                book.getStatus()
-            };
-            booksTableModel.addRow(row);
-        }
-        
-        // Sort by ID
-        booksTableModel.fireTableDataChanged();
-        updateStatusCounts();
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                List<Book> booksList = library.getAllBooks();
+                booksTableModel.setRowCount(0);
+                
+                // Filter out deleted books
+                List<Book> activeBooks = new ArrayList<>();
+                for (Book book : booksList) {
+                    if (!book.isDeleted()) {
+                        activeBooks.add(book);
+                    }
+                }
+                
+                for (Book book : activeBooks) {
+                    Object[] row = {
+                        book.getId(),
+                        book.getTitle(),
+                        book.getAuthor(),
+                        book.getPublicationYear(),
+                        book.getPublisher(),
+                        book.getStatus()
+                    };
+                    booksTableModel.addRow(row);
+                }
+                
+                booksTableModel.fireTableDataChanged();
+                booksTable.repaint();
+            }
+        });
     }
-
+    
+    // Update displayPatrons() similarly:
     public void displayPatrons() {
-        List<Patron> patronsList = library.getAllPatrons();
-        patronsTableModel.setRowCount(0);
-        
-        // Filter out deleted patrons for display
-        List<Patron> activePatrons = patronsList.stream()
-            .filter(patron -> !patron.isDeleted())
-            .toList();
-        
-        for (Patron patron : activePatrons) {
-            Object[] row = {
-                patron.getId(),
-                patron.getName(),
-                patron.getPhone(),
-                patron.getEmail(),
-                patron.getBooks().size()
-            };
-            patronsTableModel.addRow(row);
-        }
-        
-        // Sort by ID
-        patronsTableModel.fireTableDataChanged();
-        updateStatusCounts();
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                List<Patron> patronsList = library.getAllPatrons();
+                patronsTableModel.setRowCount(0);
+                
+                // Filter out deleted patrons
+                List<Patron> activePatrons = new ArrayList<>();
+                for (Patron patron : patronsList) {
+                    if (!patron.isDeleted()) {
+                        activePatrons.add(patron);
+                    }
+                }
+                
+                for (Patron patron : activePatrons) {
+                    Object[] row = {
+                        patron.getId(),
+                        patron.getName(),
+                        patron.getPhone(),
+                        patron.getEmail(),
+                        patron.getBooks().size()
+                    };
+                    patronsTableModel.addRow(row);
+                }
+                
+                patronsTableModel.fireTableDataChanged();
+                patronsTable.repaint();
+            }
+        });
     }
     
     private void showBookDetailsDialog() {
@@ -498,7 +590,16 @@ public class MainWindow extends JFrame implements ActionListener {
         if (patronIdStr != null && !patronIdStr.trim().isEmpty()) {
             try {
                 int patronId = Integer.parseInt(patronIdStr.trim());
-                showPatronDetails(patronId);
+                try {
+                    Patron patron = library.getPatronByID(patronId);
+                    
+                    // Use the new detailed dialog
+                    new PatronDetailsWindow(this, patron);
+                    
+                } catch (Exception e) {
+                    showError("Patron Not Found", 
+                        "Patron with ID " + patronId + " not found or has been deleted.\n" + e.getMessage());
+                }
             } catch (NumberFormatException e) {
                 showError("Invalid Input", "Please enter a valid numeric Patron ID.");
             }
@@ -554,21 +655,21 @@ public class MainWindow extends JFrame implements ActionListener {
             "══════════════════════════════════════════\n" +
             "        LIBRARY SYSTEM COMMANDS\n" +
             "══════════════════════════════════════════\n\n" +
-            "📚 BOOK COMMANDS:\n" +
+            "BOOK COMMANDS:\n" +
             "  • Add Book: Add new book to library\n" +
             "  • Delete Book: Soft delete a book\n" +
             "  • Issue Book: Checkout book to patron\n" +
             "  • Return Book: Return borrowed book\n" +
             "  • Renew Book: Extend loan period\n\n" +
-            "👥 PATRON COMMANDS:\n" +
+            "PATRON COMMANDS:\n" +
             "  • Add Patron: Register new patron\n" +
             "  • Delete Patron: Soft delete a patron\n" +
             "  • Show Patron: View patron details\n" +
             "  • Patron History: View loan history\n\n" +
-            "📊 VIEW COMMANDS:\n" +
+            "VIEW COMMANDS:\n" +
             "  • View All Books: List all books\n" +
             "  • View All Patrons: List all patrons\n\n" +
-            "💾 FILE COMMANDS:\n" +
+            "FILE COMMANDS:\n" +
             "  • Save Data: Save to file\n" +
             "  • Create Backup: Backup data files\n" +
             "══════════════════════════════════════════\n";
@@ -583,28 +684,7 @@ public class MainWindow extends JFrame implements ActionListener {
         JOptionPane.showMessageDialog(this, scrollPane, "Available Commands", 
             JOptionPane.INFORMATION_MESSAGE);
     }
-    
-    private void showAbout() {
-        String aboutText = 
-            "══════════════════════════════════════════\n" +
-            "      LIBRARY MANAGEMENT SYSTEM\n" +
-            "══════════════════════════════════════════\n\n" +
-            "Version: 2.0\n" +
-            "Developed by: Library Systems Team\n" +
-            "Last Updated: January 2024\n\n" +
-            "FEATURES:\n" +
-            "• Book management (add, delete, search)\n" +
-            "• Patron management with email support\n" +
-            "• Loan tracking with due dates\n" +
-            "• Soft delete functionality\n" +
-            "• Borrowing limits per patron\n" +
-            "• GUI and command-line interfaces\n" +
-            "• File-based data storage\n\n" +
-            "══════════════════════════════════════════\n";
-        
-        JOptionPane.showMessageDialog(this, aboutText, "About", 
-            JOptionPane.INFORMATION_MESSAGE);
-    }
+
     
     private void exitApplication() {
         int confirm = JOptionPane.showConfirmDialog(this,

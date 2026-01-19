@@ -88,7 +88,7 @@ public class PatronBooksDetailsPopup extends JDialog {
     
     private String getPatronInfoFromCommand() {
         try {
-            // ✅ ACTUALLY USE ShowPatron COMMAND
+            // ACTUALLY USE ShowPatron COMMAND
             Command showPatronCommand = new ShowPatron(patron.getId());
             
             // Execute command and capture output

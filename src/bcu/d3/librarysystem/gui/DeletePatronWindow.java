@@ -268,6 +268,9 @@ public class DeletePatronWindow extends JDialog implements ActionListener {
             Command deletePatronCmd = new DeletePatron(patronId);
             deletePatronCmd.execute(mw.getLibrary(), LocalDate.now());
             
+            // FIX: Use the new refresh method
+            mw.refreshAllDisplays();
+            
             // Show success message
             JOptionPane.showMessageDialog(this,
                 "Patron has been successfully soft deleted.\n" +
@@ -275,15 +278,7 @@ public class DeletePatronWindow extends JDialog implements ActionListener {
                 "Success",
                 JOptionPane.INFORMATION_MESSAGE);
             
-            // Refresh the view
-            mw.displayPatrons();
-            
-            // Clear and reset
-            patronIdText.setText("");
-            statusArea.setText("");
-            booksArea.setText("");
-            deleteBtn.setEnabled(false);
-            patronIdText.requestFocus();
+            dispose(); // Close the window
             
         } catch (LibraryException ex) {
             JOptionPane.showMessageDialog(this, 
@@ -295,6 +290,6 @@ public class DeletePatronWindow extends JDialog implements ActionListener {
                 "Invalid Patron ID. Please enter a number.", 
                 "Invalid Input", 
                 JOptionPane.ERROR_MESSAGE);
+            }
         }
-    }
 }

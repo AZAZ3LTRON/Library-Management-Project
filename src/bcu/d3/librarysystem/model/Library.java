@@ -33,17 +33,12 @@ public class Library {
         Patron patron = getPatronByID(patronId);
         return borrowingLimit - patron.getBooks().size();
     }
+    
     // Book Methods
     public List<Book> getBooks() {
         List<Book> out = new ArrayList<>(books.values());
+        out.removeIf(Book::isDeleted);
         return Collections.unmodifiableList(out);
-    }
-
-    // For 7.1 
-    public List<Book> getDeletedBooks() {
-        return books.values().stream()
-            .filter(Book::isDeleted)
-            .collect(Collectors.toList());
     }
 
     //Updatted for 7.1
@@ -57,7 +52,8 @@ public class Library {
         }
         return book;
     }
-
+    
+    // Updated for 7.1
     public List<Book> getAllBooks(){
     	List<Book> out = new ArrayList<>(books.values());
     	return Collections.unmodifiableList(out);

@@ -31,12 +31,14 @@ public class DisplayPatronWindow extends JDialog implements ActionListener {
         this.currentDate = LocalDate.now();
         initialize();
         loadPatrons();
+        setVisible(true); // Make it modal
     }
     
     private void initialize() {
-        setTitle("Browse Patrons");
-        setSize(550, 450);
+        setTitle("Browse Library Patrons");
+        setSize(700, 500);
         setLocationRelativeTo(getParent());
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));

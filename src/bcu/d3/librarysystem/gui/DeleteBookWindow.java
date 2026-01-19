@@ -3,6 +3,7 @@ package bcu.d3.librarysystem.gui;
 import bcu.d3.librarysystem.commands.Command;
 import bcu.d3.librarysystem.commands.DeleteBook;
 import bcu.d3.librarysystem.main.LibraryException;
+import bcu.d3.librarysystem.model.Book;
 import java.awt.*;
 import java.awt.event.*;
 import java.time.LocalDate;
@@ -18,9 +19,11 @@ public class DeleteBookWindow extends JFrame implements ActionListener {
     private JButton cancelBtn = new JButton("Cancel");
     private JButton findBtn = new JButton("Find Book");
 
-    public DeleteBookWindow(MainWindow mw){
+    public DeleteBookWindow(MainWindow mw, int bookId){
         this.mw = mw;
         initialize();
+        bookIdText.setText(String.valueOf(bookId));
+        findBookDetails();
     }
 
     private void initialize() {
@@ -63,7 +66,12 @@ public class DeleteBookWindow extends JFrame implements ActionListener {
         // Set initial focus
         bookIdText.requestFocus();
     }
-
+    
+    public void setBookId(int bookId) {
+        bookIdText.setText(String.valueOf(bookId));
+        findBookDetails();
+    }
+    
     private void findBookDetails() {
         String idText = bookIdText.getText().trim();
         
@@ -80,7 +88,7 @@ public class DeleteBookWindow extends JFrame implements ActionListener {
             
             // Try to get book from library
             try {
-                var book = mw.getLibrary().getBookByID(bookId);
+                Book book = mw.getLibrary().getBookByID(bookId);
                 
                 // Display book details
                 StringBuilder details = new StringBuilder();
@@ -133,9 +141,9 @@ public class DeleteBookWindow extends JFrame implements ActionListener {
         }
     }
 
-    private void deleteBook(){
+        private void deleteBook(){
         String idText = bookIdText.getText().trim();
-
+    
         if (idText.isEmpty()){
             JOptionPane.showMessageDialog(this, "Please enter a Book ID");
             return;
@@ -144,11 +152,20 @@ public class DeleteBookWindow extends JFrame implements ActionListener {
             int bookId = Integer.parseInt(idText);
             Command deleteBook = new DeleteBook(bookId);
             deleteBook.execute(mw.getLibrary(), LocalDate.now());
-            mw.displayBooks();
+            
+            // FIX: Use the new refresh method
+            mw.refreshDisplay();
+            
+            // Show success message
+            JOptionPane.showMessageDialog(this, 
+                "Book has been successfully soft deleted.", 
+                "Success", 
+                JOptionPane.INFORMATION_MESSAGE);
+                
+            dispose(); // Close the window
         }
         catch (LibraryException ex){
-            JOptionPane.showMessageDialog(this, ex, "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 }
-

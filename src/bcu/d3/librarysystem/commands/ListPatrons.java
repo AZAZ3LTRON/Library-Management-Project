@@ -6,13 +6,16 @@ import bcu.d3.librarysystem.model.Library;
 import bcu.d3.librarysystem.model.Patron;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ListPatrons implements Command {
     
     @Override
     public void execute(Library library, LocalDate currentDate) throws LibraryException {
         // Get all patrons from the library (assuming TreeMap returns values sorted by key)
-        List<Patron> patronsList = library.getAllPatrons();
+        List<Patron> patronsList = library.getAllPatrons().stream()
+                .filter(patron -> !patron.isDeleted())  // Filter out deleted patrons
+                .collect(Collectors.toList());
         
         if (patronsList.isEmpty()) {
             System.out.println("\nNo patron's found.\n");

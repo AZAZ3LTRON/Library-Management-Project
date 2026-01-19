@@ -17,9 +17,13 @@ public class ShowBook implements Command {
     public void execute(Library library, LocalDate currentDate) throws LibraryException {
         Book book = library.getBookByID(bookId);
         
+        if (book.isDeleted()) {
+            System.out.println("\n This book has been deleted.");
+            return;
+        }
+        
+        
         System.out.println("\n══════════════════════════════════════════");
-        System.out.println("              BOOK DETAILS");
-        System.out.println("══════════════════════════════════════════");
         System.out.println("ID:           " + book.getId());
         System.out.println("Title:        " + book.getTitle());
         System.out.println("Author:       " + book.getAuthor());
